@@ -39,6 +39,7 @@ namespace TMSDWFileEncryptionDecryptionFunc
 
                 log.LogInformation("encryptColumnsParquetFile Function Started");
                 string strRequestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                #region Read Request Body
                 if (!String.IsNullOrEmpty(strRequestBody))
                 {
                     //ColumnCryptoghapherRequest columnCryptoghapherRequest;
@@ -65,30 +66,17 @@ namespace TMSDWFileEncryptionDecryptionFunc
                 {
                     throw new Exception("Request Body is null");
                 }
+                #endregion
                 //Get the Encryption Key
                 ProtectedDataEncryptionKey encryptionKey = ColumnCryptoghrapherHelper.getEncyryptionKey(keyObjPath);
 
-                Stream inputStream;
-                //Read blob content
-                try
-                {
-                    inputStream = ColumnCryptoghrapherHelper.getBlobContentToStream(saConnectionString, blobContainerName, inputBlobName);
-                }
-                catch (Exception exp)
-                {
-                    throw new Exception("Could not read Blob Content. " + exp.Message);
-                }
-                MemoryStream encryptedMemoryStream = ColumnCryptoghrapherHelper.encryptColumnsParquetFile(inputStream, encryptionKey, saConnectionString, blobContainerName, encryptedBlobName);
-                //encryptedMemoryStream.Position = 0;
-
+                ColumnCryptoghrapherHelper.encryptColumnsParquetFile(inputBlobName, encryptedBlobName, saConnectionString, blobContainerName, encryptionKey);
 
                 log.LogInformation("encryptColumnsParquetFile Function Ended");
             }
             catch (Exception exp)
-            {
-                //return StatusCode((int)HttpStatusCode.InternalServerError, exp.Message);    
-                return new ExceptionResult(exp, true);
-                //return new InternalServerErrorResult();
+            {                  
+                return new ExceptionResult(exp, true);             
             }
             return new OkObjectResult(responseMessage);
         }
